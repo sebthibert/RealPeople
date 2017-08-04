@@ -9,7 +9,6 @@ var express = require('express')
     , port = process.env.PORT || 3000
     , router = express.Router()
     , fs = require('fs')
-    , http = require('http')
     , request = require('request');
 
 app.use(express.static(__dirname + '/views')); // set the static files location for the static html
@@ -37,27 +36,6 @@ var upload = multer({
 });
 
 
-
-function getImages() {
-  var options = {
-  host: 'realpeople.uksouth.cloudapp.azure.com',
-  port: 8080,
-  path: '/service/real-people/v1.0/products/users'
-  };
-
-  http.get(options, function(res) {
-    console.log("Got response: " + res.statusCode);
-
-    res.on("data", function(chunk) {
-      console.log("BODY: " + chunk);
-    });
-  }).on('error', function(e) {
-    console.log("Got error: " + e.message);
-  });
-};
-
-
-
 router.get('/', function(req, res, next) {
     res.render('index.html');
 });
@@ -65,8 +43,6 @@ router.get('/', function(req, res, next) {
 
 // POST Upload Image
 router.post('/upload', upload.single("image"), function(req, res) {
-
-    getImages();
 
     var data;
     // Get your data from your database
