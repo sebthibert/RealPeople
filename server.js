@@ -35,7 +35,11 @@ var upload = multer({
   storage: storage
 });
 
-var indexRoute = require('./server/routes/index/route');
+
+router.get('/', function(req, res, next) {
+    res.render('index.html');
+});
+
 
 // POST Upload Image
 router.post('/upload', upload.single("image"), function(req, res) {
@@ -113,7 +117,7 @@ router.post('/upload', upload.single("image"), function(req, res) {
 	});
 });
 
-app.use('/index', indexRoute);
+app.use('/', router);
 
 app.listen(port);
 console.log('App running on port', port);
