@@ -1,24 +1,43 @@
-var express = require('express')
-    , morgan = require('morgan')
-    , bodyParser = require('body-parser')
-    , multer = require('multer')
-    , crypto = require('crypto')
-    , methodOverride = require('method-override')
-    , mime = require('mime')
-    , app = express()
-    , port = process.env.PORT || 3000
-    , router = express.Router()
-    , fs = require('fs')
-    , request = require('request');
+
+var express = require('express'),
+//morgan = require('morgan'),
+bodyParser = require('body-parser'),
+multer = require('multer'),
+crypto = require('crypto'),
+methodOverride = require('method-override'),
+mime = require('mime'),
+app = express(),
+port = process.env.PORT || 3000,
+router = express.Router(),
+fs = require('fs'),
+http = require('http'),
+exphbs = require('express-handlebars');
+request = require('request');
+
+var indexRoute = require('./server/routes/index/route');
 
 app.use(express.static(__dirname + '/views')); // set the static files location for the static html
 app.use(express.static(__dirname + '/public')); // set the static files location /public/img will be /img for users
-app.use(morgan('dev'));
+
+//app.use(morgan('dev'));
+
+app.engine('hbs', exphbs({
+    extname:'hbs',
+    defaultLayout:'main.hbs'
+}));
+
+app.set('view engine', 'hbs');
+
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
 app.use(methodOverride());                  // simulate DELETE and PUT
+
+app.use('/', indexRoute);
+
+app.listen(port);
+console.log('App running on port', port);
 
 var storage = multer.diskStorage({
   destination: function(req, file, cb) {
@@ -35,15 +54,7 @@ var upload = multer({
   storage: storage
 });
 
-
-router.get('/', function(req, res, next) {
-    res.render('index.html');
-});
-
-
-// POST Upload Image
 router.post('/upload', upload.single("image"), function(req, res) {
-
     var data;
     // Get your data from your database
     var flickr = require('flickr-with-uploads');
@@ -54,8 +65,8 @@ router.post('/upload', upload.single("image"), function(req, res) {
   	process.env.oauth_secret);
 
   	var fullpath = __dirname+'/public/uploads/'+req.file.filename;
-	var val;
-	var photoStaticURL;
+	   var val;
+	    var photoStaticURL;
 
 	console.log('Request------------->>>>>'+req.body.caption, req.body.name, req.body.product, req.body.description);
 
@@ -116,8 +127,3 @@ router.post('/upload', upload.single("image"), function(req, res) {
 		  }
 	});
 });
-
-app.use('/', router);
-
-app.listen(port);
-console.log('App running on port', port);
